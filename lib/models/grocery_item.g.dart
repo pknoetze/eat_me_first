@@ -17,10 +17,10 @@ class GroceryItemAdapter extends TypeAdapter<GroceryItem> {
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
     return GroceryItem(
-      id: fields[0] as String?,
+      id: fields[0] as String,
       name: fields[1] as String,
       expiryDate: fields[2] as DateTime?,
-      delivered: fields[3] as bool,
+      trackingEnabled: fields[3] as bool,
     );
   }
 
@@ -35,7 +35,7 @@ class GroceryItemAdapter extends TypeAdapter<GroceryItem> {
       ..writeByte(2)
       ..write(obj.expiryDate)
       ..writeByte(3)
-      ..write(obj.delivered);
+      ..write(obj.trackingEnabled);
   }
 
   @override

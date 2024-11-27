@@ -48,11 +48,11 @@ class _HomeScreenState extends State<HomeScreen> {
     int expiringToday = 0;
     int expiringTomorrow = 0;
     int expiringThisWeek = 0;
-    int delivered = 0;
+    int tracked = 0;
 
     for (final item in _items) {
-      if (item.delivered) {
-        delivered++;
+      if (item.trackingEnabled) {
+        tracked++;
       }
       
       // Skip items without expiry dates
@@ -80,7 +80,7 @@ class _HomeScreenState extends State<HomeScreen> {
       expiringTodayCount: expiringToday,
       expiringTomorrowCount: expiringTomorrow,
       expiringThisWeekCount: expiringThisWeek,
-      deliveredCount: delivered,
+      deliveredCount: tracked,
     );
   }
 
@@ -100,7 +100,7 @@ class _HomeScreenState extends State<HomeScreen> {
           case FilterOption.thisWeek:
             return item.expiryDate != null && item.daysUntilExpiry > 1 && item.daysUntilExpiry <= 7;
           case FilterOption.delivered:
-            return item.delivered;
+            return item.trackingEnabled;
         }
       }).toList();
     }

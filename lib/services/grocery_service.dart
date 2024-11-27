@@ -27,7 +27,7 @@ class GroceryService {
   }
 
   Future<void> toggleDeliveryStatus(GroceryItem item) async {
-    item.toggleDelivered();
+    item.toggleTracking();
     await updateItem(item);
   }
 

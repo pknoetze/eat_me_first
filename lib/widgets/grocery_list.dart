@@ -74,10 +74,17 @@ class GroceryList extends StatelessWidget {
   }
 
   Widget _buildGroceryCard(BuildContext context, GroceryItem item) {
+    final isExpired = item.trackingEnabled && item.isExpired();
+    final theme = Theme.of(context);
+
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
+        side: isExpired ? BorderSide(
+          color: theme.colorScheme.error,
+          width: 2,
+        ) : BorderSide.none,
       ),
       child: InkWell(
         onTap: () async {
@@ -94,6 +101,14 @@ class GroceryList extends StatelessWidget {
           padding: const EdgeInsets.all(16.0),
           child: Row(
             children: [
+              if (isExpired)
+                Padding(
+                  padding: const EdgeInsets.only(right: 12.0),
+                  child: Icon(
+                    Icons.warning_rounded,
+                    color: theme.colorScheme.error,
+                  ),
+                ),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -101,29 +116,35 @@ class GroceryList extends StatelessWidget {
                   children: [
                     Text(
                       item.name,
-                      style: Theme.of(context).textTheme.titleMedium,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        color: isExpired ? theme.colorScheme.error : null,
+                      ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 4),
                     Text(
                       item.expiryDate != null 
-                        ? 'Expires: ${_formatDate(item.expiryDate!)}'
-                        : 'No expiry date set',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                        ? '${isExpired ? "Expired" : "Expires"}: ${_formatDate(item.expiryDate!)}'
+                        : 'Expiry tracking disabled',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: isExpired 
+                          ? theme.colorScheme.error
+                          : theme.colorScheme.onSurface.withOpacity(0.7),
                       ),
                     ),
                   ],
                 ),
               ),
-              if (item.delivered)
+              if (item.trackingEnabled && !isExpired)
                 Icon(
-                  Icons.check_circle,
+                  Icons.track_changes,
                   color: Colors.green[400],
                 ),
               PopupMenuButton<String>(
-                icon: const Icon(Icons.more_vert),
+                icon: Icon(Icons.more_vert, 
+                  color: isExpired ? theme.colorScheme.error : null
+                ),
                 onSelected: (value) {
                   switch (value) {
                     case 'toggle':
@@ -140,11 +161,11 @@ class GroceryList extends StatelessWidget {
                     child: Row(
                       children: [
                         Icon(
-                          item.delivered ? Icons.remove_circle_outline : Icons.check_circle_outline,
-                          color: Theme.of(context).colorScheme.onSurface,
+                          item.trackingEnabled ? Icons.notifications_off : Icons.notifications,
+                          color: theme.colorScheme.onSurface,
                         ),
                         const SizedBox(width: 8),
-                        Text(item.delivered ? 'Mark as Not Delivered' : 'Mark as Delivered'),
+                        Text(item.trackingEnabled ? 'Disable Tracking' : 'Enable Tracking'),
                       ],
                     ),
                   ),
@@ -154,7 +175,7 @@ class GroceryList extends StatelessWidget {
                       children: [
                         Icon(
                           Icons.delete_outline,
-                          color: Theme.of(context).colorScheme.error,
+                          color: theme.colorScheme.error,
                         ),
                         const SizedBox(width: 8),
                         const Text('Delete'),
@@ -171,13 +192,16 @@ class GroceryList extends StatelessWidget {
   }
 
   Widget _buildGroceryItem(BuildContext context, GroceryItem item) {
+    final isExpired = item.trackingEnabled && item.isExpired();
+    final theme = Theme.of(context);
+
     return Dismissible(
       key: Key(item.id),
       background: Container(
         color: Colors.green,
         alignment: Alignment.centerLeft,
         padding: const EdgeInsets.only(left: 16.0),
-        child: const Icon(Icons.check, color: Colors.white),
+        child: const Icon(Icons.track_changes, color: Colors.white),
       ),
       secondaryBackground: Container(
         color: Colors.red,
@@ -214,43 +238,65 @@ class GroceryList extends StatelessWidget {
           onDelete(item);
         }
       },
-      child: ListTile(
-        title: Text(
-          item.name,
+      child: Container(
+        decoration: BoxDecoration(
+          border: isExpired ? Border(
+            left: BorderSide(
+              color: theme.colorScheme.error,
+              width: 4,
+            ),
+          ) : null,
         ),
-        subtitle: Text(
-          item.expiryDate != null 
-            ? 'Expires: ${_formatDate(item.expiryDate!)}'
-            : 'No expiry date set',
-          style: TextStyle(
-            color: Theme.of(context).colorScheme.onSurface.withOpacity(
-              item.delivered ? 0.5 : 0.7,
+        child: ListTile(
+          leading: isExpired 
+            ? Icon(
+                Icons.warning_rounded,
+                color: theme.colorScheme.error,
+              )
+            : null,
+          title: Text(
+            item.name,
+            style: TextStyle(
+              color: isExpired ? theme.colorScheme.error : null,
             ),
           ),
+          subtitle: Text(
+            item.expiryDate != null 
+              ? '${isExpired ? "Expired" : "Expires"}: ${_formatDate(item.expiryDate!)}'
+              : 'Expiry tracking disabled',
+            style: TextStyle(
+              color: isExpired 
+                ? theme.colorScheme.error
+                : theme.colorScheme.onSurface.withOpacity(0.7),
+            ),
+          ),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (item.trackingEnabled && !isExpired)
+                const Icon(Icons.track_changes, color: Colors.green),
+              const SizedBox(width: 8),
+              Icon(
+                Icons.chevron_right,
+                color: isExpired ? theme.colorScheme.error : null,
+              ),
+            ],
+          ),
+          onTap: () async {
+            final updatedItem = await showDialog<GroceryItem>(
+              context: context,
+              builder: (context) => EditGroceryDialog(item: item),
+            );
+            if (updatedItem != null) {
+              onItemUpdated(updatedItem);
+            }
+          },
         ),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (item.delivered)
-              const Icon(Icons.check_circle, color: Colors.green),
-            const SizedBox(width: 8),
-            const Icon(Icons.chevron_right),
-          ],
-        ),
-        onTap: () async {
-          final updatedItem = await showDialog<GroceryItem>(
-            context: context,
-            builder: (context) => EditGroceryDialog(item: item),
-          );
-          if (updatedItem != null) {
-            onItemUpdated(updatedItem);
-          }
-        },
       ),
     );
   }
 
   String _formatDate(DateTime date) {
-    return DateFormat('EEEE, d MMMM y').format(date);
+    return DateFormat('EEEE, d MMM y').format(date);
   }
 }

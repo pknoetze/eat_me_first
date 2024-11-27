@@ -67,9 +67,9 @@ class DashboardStats extends StatelessWidget {
               color: theme.colorScheme.tertiary,
             ),
             _StatCard(
-              label: 'Delivered',
+              label: 'Tracked Items',
               value: stats.deliveredCount.toString(),
-              icon: Icons.check_circle_outline_rounded,
+              icon: Icons.track_changes,
               isActive: activeFilter == FilterOption.delivered,
               onTap: () => _handleFilterTap(FilterOption.delivered),
               color: theme.colorScheme.primary,
@@ -119,56 +119,58 @@ class _StatCard extends StatelessWidget {
   final Color color;
 
   const _StatCard({
-    Key? key,
     required this.label,
     required this.value,
     required this.icon,
     required this.isActive,
     required this.onTap,
     required this.color,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final backgroundColor = isActive ? color.withOpacity(0.1) : Colors.transparent;
-    final foregroundColor = isActive ? color : theme.colorScheme.onSurface;
-
-    return Padding(
-      padding: const EdgeInsets.only(right: 8.0),
-      child: Material(
-        color: backgroundColor,
-        borderRadius: BorderRadius.circular(12),
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(12),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-            child: Row(
-              children: [
-                Icon(icon, color: foregroundColor),
-                const SizedBox(width: 8),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      value,
-                      style: theme.textTheme.titleLarge?.copyWith(
-                        color: foregroundColor,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Text(
-                      label,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: foregroundColor,
-                      ),
-                    ),
-                  ],
+    
+    return Card(
+      elevation: isActive ? 4 : 1,
+      color: isActive ? color.withOpacity(0.1) : null,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(
+          color: isActive ? color : Colors.transparent,
+          width: 2,
+        ),
+      ),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                icon,
+                color: color,
+                size: 32,  
+              ),
+              const SizedBox(height: 8),
+              Text(
+                value,
+                style: theme.textTheme.headlineSmall?.copyWith(
+                  color: color,
+                  fontWeight: FontWeight.bold,
                 ),
-              ],
-            ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                label,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurface.withOpacity(0.7),
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
           ),
         ),
       ),

@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'screens/home_screen.dart';
 import 'models/grocery_item.dart';
+import 'screens/splash_screen.dart';
 
 void main() async {
   await Hive.initFlutter();
   Hive.registerAdapter(GroceryItemAdapter());
+  await Hive.openBox<GroceryItem>('groceries');
   runApp(const MyApp());
 }
 
@@ -21,12 +23,9 @@ class MyApp extends StatelessWidget {
       darkTheme: ThemeData(
         useMaterial3: true,
         brightness: Brightness.dark,
-        colorScheme: ColorScheme.dark(
-          primary: Colors.green[400]!,
-          secondary: Colors.tealAccent[400]!,
-          surface: const Color(0xFF1E1E1E),
-          background: const Color(0xFF121212),
-          error: Colors.redAccent[400]!,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.green,
+          brightness: Brightness.dark,
         ),
         scaffoldBackgroundColor: const Color(0xFF121212),
         appBarTheme: AppBarTheme(
@@ -97,7 +96,11 @@ class MyApp extends StatelessWidget {
           ),
         ),
       ),
-      home: const HomeScreen(),
+      initialRoute: '/',
+      routes: {
+        '/': (context) => const SplashScreen(),
+        '/home': (context) => const HomeScreen(),
+      },
     );
   }
 }

@@ -16,11 +16,12 @@ class AddGroceryDialog extends StatefulWidget {
 
 class _AddGroceryDialogState extends State<AddGroceryDialog> {
   final _nameController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
   DateTime? _expiryDate;
-  bool _delivered = false;
+  bool _trackingEnabled = false;
 
   String _formatDate(DateTime date) {
-    return DateFormat('EEEE, d MMMM y').format(date);
+    return DateFormat('EEEE, d MMM y').format(date);
   }
 
   @override
@@ -30,10 +31,10 @@ class _AddGroceryDialogState extends State<AddGroceryDialog> {
   }
 
   Future<void> _selectDate(BuildContext context) async {
-    if (!_delivered) {
+    if (!_trackingEnabled) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('You can only set expiry date for delivered items'),
+          content: Text('You can only set expiry date when tracking is enabled'),
           duration: Duration(seconds: 2),
         ),
       );
@@ -57,61 +58,84 @@ class _AddGroceryDialogState extends State<AddGroceryDialog> {
   Widget build(BuildContext context) {
     return AlertDialog(
       title: const Text('Add Grocery Item'),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          TextField(
-            controller: _nameController,
-            decoration: const InputDecoration(
-              labelText: 'Item Name',
-              hintText: 'Enter item name',
-            ),
-            autofocus: true,
-            textCapitalization: TextCapitalization.sentences,
-          ),
-          const SizedBox(height: 16),
-          SwitchListTile(
-            title: const Text('Delivered'),
-            value: _delivered,
-            onChanged: (value) {
-              setState(() {
-                _delivered = value;
-                if (!value) {
-                  // Clear expiry date when unmarking as delivered
-                  _expiryDate = null;
-                } else {
-                  // Set expiry date to today when marking as delivered
-                  _expiryDate = DateTime.now();
+      content: Form(
+        key: _formKey,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextFormField(
+              controller: _nameController,
+              decoration: const InputDecoration(
+                labelText: 'Item Name',
+                hintText: 'Enter item name',
+                errorStyle: TextStyle(height: 0.8),
+              ),
+              autofocus: true,
+              textCapitalization: TextCapitalization.sentences,
+              validator: (value) {
+                if (value == null || value.trim().isEmpty) {
+                  return 'Please enter an item name';
                 }
-              });
-            },
-          ),
-          if (_delivered) ...[
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Expanded(
-                  child: Text(_expiryDate != null
-                      ? 'Expiry: ${_formatDate(_expiryDate!)}'
-                      : 'No expiry date set'),
-                ),
-                TextButton(
-                  onPressed: () => _selectDate(context),
-                  child: const Text('Select Date'),
-                ),
-                if (_expiryDate != null)
-                  IconButton(
-                    icon: const Icon(Icons.clear),
-                    onPressed: () {
-                      setState(() {
-                        _expiryDate = null;
-                      });
-                    },
-                  ),
-              ],
+                return null;
+              },
             ),
+            const SizedBox(height: 16),
+            SwitchListTile(
+              title: const Text('Enable Tracking'),
+              subtitle: const Text('Track expiry date for this item'),
+              value: _trackingEnabled,
+              onChanged: (value) {
+                setState(() {
+                  _trackingEnabled = value;
+                  if (!value) {
+                    // Clear expiry date when disabling tracking
+                    _expiryDate = null;
+                  } else {
+                    // Set expiry date to today when enabling tracking
+                    _expiryDate = DateTime.now();
+                  }
+                });
+              },
+            ),
+            if (_trackingEnabled) ...[
+              const SizedBox(height: 8),
+              const Text(
+                'Set the date to either:\n'
+                '• Product\'s expiry date (if available)\n'
+                '• Delivery date\n'
+                '• Any custom date\n'
+                'Default is today\'s date',
+                style: TextStyle(
+                  fontSize: 12,
+                  height: 1.4,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(_expiryDate != null
+                        ? 'Expiry: ${_formatDate(_expiryDate!)}'
+                        : 'No expiry date set'),
+                  ),
+                  TextButton(
+                    onPressed: () => _selectDate(context),
+                    child: const Text('Select Date'),
+                  ),
+                  if (_expiryDate != null)
+                    IconButton(
+                      icon: const Icon(Icons.clear),
+                      onPressed: () {
+                        setState(() {
+                          _expiryDate = null;
+                        });
+                      },
+                    ),
+                ],
+              ),
+            ],
           ],
-        ],
+        ),
       ),
       actions: [
         TextButton(
@@ -120,16 +144,15 @@ class _AddGroceryDialogState extends State<AddGroceryDialog> {
         ),
         TextButton(
           onPressed: () {
-            if (_nameController.text.isEmpty) {
-              return;
+            if (_formKey.currentState!.validate()) {
+              final item = GroceryItem(
+                name: _nameController.text.trim(),
+                expiryDate: _trackingEnabled ? _expiryDate : null,
+                trackingEnabled: _trackingEnabled,
+              );
+              widget.onAdd(item);
+              Navigator.of(context).pop();
             }
-            final item = GroceryItem(
-              name: _nameController.text,
-              expiryDate: _delivered ? _expiryDate : null,
-              delivered: _delivered,
-            );
-            widget.onAdd(item);
-            Navigator.of(context).pop();
           },
           child: const Text('Add'),
         ),

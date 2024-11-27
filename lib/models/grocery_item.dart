@@ -16,22 +16,22 @@ class GroceryItem extends HiveObject {
   DateTime? expiryDate;
 
   @HiveField(3)
-  bool delivered;
+  bool trackingEnabled;
 
   GroceryItem({
     String? id,
     required this.name,
     this.expiryDate,
-    this.delivered = false,
+    this.trackingEnabled = false,
   }) : id = id ?? const Uuid().v4();
 
-  void toggleDelivered() {
-    delivered = !delivered;
-    if (delivered) {
-      // When marking as delivered, set expiry date to today if not already set
+  void toggleTracking() {
+    trackingEnabled = !trackingEnabled;
+    if (trackingEnabled) {
+      // When enabling tracking, set expiry date to today if not already set
       expiryDate ??= DateTime.now();
     } else {
-      // When unmarking as delivered, clear the expiry date
+      // When disabling tracking, clear the expiry date
       expiryDate = null;
     }
     save();
@@ -63,7 +63,7 @@ class GroceryItem extends HiveObject {
       'id': id,
       'name': name,
       'expiryDate': expiryDate?.millisecondsSinceEpoch,
-      'delivered': delivered,
+      'trackingEnabled': trackingEnabled,
     };
   }
 
@@ -74,7 +74,7 @@ class GroceryItem extends HiveObject {
       expiryDate: json['expiryDate'] != null
           ? DateTime.fromMillisecondsSinceEpoch(json['expiryDate'] as int)
           : null,
-      delivered: json['delivered'] as bool,
+      trackingEnabled: json['trackingEnabled'] as bool,
     );
   }
 }
