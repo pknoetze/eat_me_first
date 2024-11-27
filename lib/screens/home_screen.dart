@@ -177,6 +177,41 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         title: const Text('Eat Me First'),
         elevation: 0,
+        actions: [
+          PopupMenuButton<SortOption>(
+            icon: Icon(
+              Icons.sort,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
+            tooltip: 'Sort items',
+            initialValue: _currentSort,
+            onSelected: _changeSortOption,
+            itemBuilder: (context) => [
+              for (final option in SortOption.values)
+                PopupMenuItem(
+                  value: option,
+                  child: Row(
+                    children: [
+                      Icon(
+                        _currentSort == option
+                            ? _sortAscending
+                                ? Icons.arrow_upward
+                                : Icons.arrow_downward
+                            : Icons.sort,
+                        size: 20,
+                        color: _currentSort == option
+                            ? Theme.of(context).colorScheme.primary
+                            : Theme.of(context).colorScheme.onSurface,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(option.label),
+                    ],
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(width: 8),
+        ],
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {

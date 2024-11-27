@@ -37,6 +37,10 @@ A modern Flutter application designed to help users track and manage their groce
 ## Version History
 
 ### Current Development (v1.1.0-dev)
+- Added sorting functionality:
+  - Sort by expiry date (default)
+  - Sort by item name
+  - Toggle ascending/descending order
 - Work in progress...
 
 ### v1.0.0
