@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart'; // Add this import
 import '../models/grocery_item.dart';
 
 class AddGroceryDialog extends StatefulWidget {
@@ -17,6 +18,10 @@ class _AddGroceryDialogState extends State<AddGroceryDialog> {
   final _nameController = TextEditingController();
   DateTime? _expiryDate;
   bool _delivered = false;
+
+  String _formatDate(DateTime date) {
+    return DateFormat('EEEE, d MMMM y').format(date);
+  }
 
   @override
   void dispose() {
@@ -87,7 +92,7 @@ class _AddGroceryDialogState extends State<AddGroceryDialog> {
               children: [
                 Expanded(
                   child: Text(_expiryDate != null
-                      ? 'Expiry: ${_expiryDate!.year}-${_expiryDate!.month}-${_expiryDate!.day}'
+                      ? 'Expiry: ${_formatDate(_expiryDate!)}'
                       : 'No expiry date set'),
                 ),
                 TextButton(

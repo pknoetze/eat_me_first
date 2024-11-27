@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../models/grocery_item.dart';
 import '../widgets/edit_grocery_dialog.dart';
 
@@ -250,6 +251,6 @@ class GroceryList extends StatelessWidget {
   }
 
   String _formatDate(DateTime date) {
-    return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+    return DateFormat('EEEE, d MMMM y').format(date);
   }
 }

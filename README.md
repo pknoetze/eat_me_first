@@ -41,6 +41,9 @@ A modern Flutter application designed to help users track and manage their groce
   - Sort by expiry date (default)
   - Sort by item name
   - Toggle ascending/descending order
+- Improved date display:
+  - Added day of the week to expiry dates
+  - More readable date format (e.g., "Monday, 27 November 2024")
 - Work in progress...
 
 ### v1.0.0
