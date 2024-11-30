@@ -10,8 +10,8 @@ import 'theme/app_theme.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Hive.initFlutter();
-  Hive.registerAdapter(GroceryItemAdapter());
-  await Hive.openBox<GroceryItem>('groceries');
+  await Hive.openBox('groceries');
+  await Hive.openBox('grocery_items');
   
   runApp(
     ChangeNotifierProvider(
@@ -26,18 +26,24 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Eat Me First',
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
-      themeMode: context.watch<ThemeService>().isDarkMode
-          ? ThemeMode.dark
-          : ThemeMode.light,
-      initialRoute: '/',
-      routes: {
-        '/': (context) => const SplashScreen(),
-        '/home': (context) => const HomeScreen(),
+    return Consumer<ThemeService>(
+      builder: (context, themeService, child) {
+        return MaterialApp(
+          title: 'Eat Me First',
+          debugShowCheckedModeBanner: false,
+          theme: themeService.isDark
+              ? AppTheme.darkTheme
+              : AppTheme.lightTheme,
+          darkTheme: AppTheme.darkTheme,
+          themeMode: themeService.isDark
+              ? ThemeMode.dark
+              : ThemeMode.light,
+          initialRoute: '/',
+          routes: {
+            '/': (context) => const SplashScreen(),
+            '/home': (context) => const HomeScreen(),
+          },
+        );
       },
     );
   }

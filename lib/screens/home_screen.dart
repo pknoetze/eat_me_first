@@ -191,12 +191,12 @@ class _HomeScreenState extends State<HomeScreen> {
         actions: [
           IconButton(
             icon: Icon(
-              context.watch<ThemeService>().isDarkMode
+              context.watch<ThemeService>().isDark
                   ? Icons.light_mode
                   : Icons.dark_mode,
             ),
-            onPressed: () {
-              context.read<ThemeService>().toggleTheme();
+            onPressed: () async {
+              await context.read<ThemeService>().toggleTheme();
             },
           ),
           PopupMenuButton<SortOption>(
