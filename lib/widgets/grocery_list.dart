@@ -27,20 +27,26 @@ class GroceryList extends StatelessWidget {
             Icon(
               Icons.shopping_basket_outlined,
               size: 64,
-              color: Theme.of(context).colorScheme.primary.withOpacity(0.5),
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Colors.green[200]
+                  : Theme.of(context).colorScheme.primary.withOpacity(0.5),
             ),
             const SizedBox(height: 16),
             Text(
               'No groceries yet',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.white70
+                        : Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
                   ),
             ),
             const SizedBox(height: 8),
             Text(
               'Add some items to get started',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.white54
+                        : Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
                   ),
             ),
           ],

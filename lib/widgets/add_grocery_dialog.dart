@@ -56,107 +56,174 @@ class _AddGroceryDialogState extends State<AddGroceryDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      title: const Text('Add Grocery Item'),
-      content: Form(
-        key: _formKey,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextFormField(
-              controller: _nameController,
-              decoration: const InputDecoration(
-                labelText: 'Item Name',
-                hintText: 'Enter item name',
-                errorStyle: TextStyle(height: 0.8),
-              ),
-              autofocus: true,
-              textCapitalization: TextCapitalization.sentences,
-              validator: (value) {
-                if (value == null || value.trim().isEmpty) {
-                  return 'Please enter an item name';
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: 16),
-            SwitchListTile(
-              title: const Text('Enable Tracking'),
-              subtitle: const Text('Track expiry date for this item'),
-              value: _trackingEnabled,
-              onChanged: (value) {
-                setState(() {
-                  _trackingEnabled = value;
-                  if (!value) {
-                    // Clear expiry date when disabling tracking
-                    _expiryDate = null;
-                  } else {
-                    // Set expiry date to today when enabling tracking
-                    _expiryDate = DateTime.now();
-                  }
-                });
-              },
-            ),
-            if (_trackingEnabled) ...[
-              const SizedBox(height: 8),
-              const Text(
-                'Set the date to either:\n'
-                '• Product\'s expiry date (if available)\n'
-                '• Delivery date\n'
-                '• Any custom date\n'
-                'Default is today\'s date',
-                style: TextStyle(
-                  fontSize: 12,
-                  height: 1.4,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(_expiryDate != null
-                        ? 'Expiry: ${_formatDate(_expiryDate!)}'
-                        : 'No expiry date set'),
-                  ),
-                  TextButton(
-                    onPressed: () => _selectDate(context),
-                    child: const Text('Select Date'),
-                  ),
-                  if (_expiryDate != null)
-                    IconButton(
-                      icon: const Icon(Icons.clear),
-                      onPressed: () {
-                        setState(() {
-                          _expiryDate = null;
-                        });
-                      },
+    final theme = Theme.of(context);
+    
+    return Dialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Header
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        'Add Item',
+                        style: theme.textTheme.titleLarge,
+                      ),
                     ),
+                    IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: () => Navigator.of(context).pop(),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                
+                // Item Name Field
+                TextFormField(
+                  controller: _nameController,
+                  decoration: InputDecoration(
+                    labelText: 'Item Name',
+                    hintText: 'Enter item name',
+                    errorStyle: const TextStyle(height: 0.8),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    filled: true,
+                  ),
+                  autofocus: true,
+                  textCapitalization: TextCapitalization.sentences,
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Please enter an item name';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 16),
+                
+                // Tracking Switch
+                Container(
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.surface,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: theme.colorScheme.outline.withOpacity(0.5),
+                    ),
+                  ),
+                  child: SwitchListTile(
+                    title: const Text('Track Expiry Date'),
+                    value: _trackingEnabled,
+                    onChanged: (value) {
+                      setState(() {
+                        _trackingEnabled = value;
+                        if (!value) {
+                          _expiryDate = null;
+                        } else {
+                          _expiryDate = DateTime.now();
+                        }
+                      });
+                    },
+                  ),
+                ),
+                
+                // Date Selection Section
+                if (_trackingEnabled) ...[
+                  const SizedBox(height: 16),
+                  Text(
+                    'Expiry Date',
+                    style: theme.textTheme.titleMedium,
+                  ),
+                  const SizedBox(height: 8),
+                  InkWell(
+                    onTap: () => _selectDate(context),
+                    child: Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.surface,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: theme.colorScheme.outline.withOpacity(0.5),
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.calendar_today,
+                            color: theme.colorScheme.primary,
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              _expiryDate != null
+                                  ? _formatDate(_expiryDate!)
+                                  : 'Select date',
+                              style: theme.textTheme.bodyLarge,
+                            ),
+                          ),
+                          if (_expiryDate != null)
+                            IconButton(
+                              icon: const Icon(Icons.clear),
+                              onPressed: () {
+                                setState(() {
+                                  _expiryDate = null;
+                                });
+                              },
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Tip: Set to product expiry date or delivery date',
+                    style: theme.textTheme.bodySmall,
+                  ),
                 ],
-              ),
-            ],
-          ],
+                
+                const SizedBox(height: 24),
+                
+                // Action Buttons
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: const Text('Cancel'),
+                    ),
+                    const SizedBox(width: 8),
+                    FilledButton(
+                      onPressed: () {
+                        if (_formKey.currentState!.validate()) {
+                          final item = GroceryItem(
+                            name: _nameController.text.trim(),
+                            expiryDate: _trackingEnabled ? _expiryDate : null,
+                            trackingEnabled: _trackingEnabled,
+                          );
+                          widget.onAdd(item);
+                          Navigator.of(context).pop();
+                        }
+                      },
+                      child: const Text('Add Item'),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
         ),
       ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
-        ),
-        TextButton(
-          onPressed: () {
-            if (_formKey.currentState!.validate()) {
-              final item = GroceryItem(
-                name: _nameController.text.trim(),
-                expiryDate: _trackingEnabled ? _expiryDate : null,
-                trackingEnabled: _trackingEnabled,
-              );
-              widget.onAdd(item);
-              Navigator.of(context).pop();
-            }
-          },
-          child: const Text('Add'),
-        ),
-      ],
     );
   }
 }

@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../models/grocery_item.dart';
 import '../models/dashboard_data.dart';
 import '../models/filter_option.dart';
 import '../models/sort_option.dart';
 import '../services/grocery_service.dart';
+import '../services/theme_service.dart';
+import '../widgets/add_grocery_dialog.dart';
 import '../widgets/dashboard_stats.dart';
 import '../widgets/grocery_list.dart';
-import '../widgets/add_grocery_dialog.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -169,6 +171,15 @@ class _HomeScreenState extends State<HomeScreen> {
     _refreshData();
   }
 
+  void _showAddItemDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AddGroceryDialog(
+        onAdd: _addItem,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final isLargeScreen = MediaQuery.of(context).size.width > 600;
@@ -178,10 +189,20 @@ class _HomeScreenState extends State<HomeScreen> {
         title: const Text('Eat Me First'),
         elevation: 0,
         actions: [
-          PopupMenuButton<SortOption>(
+          IconButton(
             icon: Icon(
+              context.watch<ThemeService>().isDarkMode
+                  ? Icons.light_mode
+                  : Icons.dark_mode,
+            ),
+            onPressed: () {
+              context.read<ThemeService>().toggleTheme();
+            },
+          ),
+          PopupMenuButton<SortOption>(
+            icon: const Icon(
               Icons.sort,
-              color: Theme.of(context).colorScheme.onSurface,
+              color: Colors.white,
             ),
             tooltip: 'Sort items',
             initialValue: _currentSort,
@@ -215,12 +236,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
-          showDialog(
-            context: context,
-            builder: (context) => AddGroceryDialog(
-              onAdd: _addItem,
-            ),
-          );
+          _showAddItemDialog(context);
         },
         icon: const Icon(Icons.add),
         label: const Text('Add Item'),

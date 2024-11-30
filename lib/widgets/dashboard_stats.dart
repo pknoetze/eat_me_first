@@ -133,7 +133,11 @@ class _StatCard extends StatelessWidget {
     
     return Card(
       elevation: isActive ? 4 : 1,
-      color: isActive ? color.withOpacity(0.1) : null,
+      color: isActive 
+          ? Theme.of(context).brightness == Brightness.light
+              ? Colors.white
+              : color.withOpacity(0.1)
+          : null,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
         side: BorderSide(
