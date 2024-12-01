@@ -33,11 +33,16 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _initializeData() async {
-    await _groceryService.init();
-    _refreshData();
+    try {
+      await _groceryService.init();
+      _refreshData();
+    } catch (e) {
+      print('Error initializing data: $e');
+    }
   }
 
   void _refreshData() {
+    if (!mounted) return;
     setState(() {
       _items = _groceryService.getAllItems();
       _stats = _calculateStats();
